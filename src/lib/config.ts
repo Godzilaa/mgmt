@@ -19,7 +19,9 @@ export const API_CONFIG = {
   DEV: {
     ENABLE_LOGGING: true,
     PROXY_ENDPOINT: '/api/proxy',
-    TEST_ENDPOINT: '/api/test',
+    // Use a dummy CAPTCHA value for development testing
+    BYPASS_CAPTCHA: true,
+    DUMMY_CAPTCHA: 'dev-bypass-2025',
   }
 };
 

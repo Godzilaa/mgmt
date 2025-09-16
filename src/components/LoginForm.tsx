@@ -64,18 +64,6 @@ export default function LoginForm() {
     });
   };
 
-  const testApiConnectivity = async () => {
-    try {
-      const response = await fetch('/api/test');
-      const data = await response.json();
-      console.log('API Test Result:', data);
-      alert(`API Test: ${data.status}`);
-    } catch (error) {
-      console.error('API Test failed:', error);
-      alert('API Test failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
-    }
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="max-w-md w-full space-y-8">
@@ -169,17 +157,6 @@ export default function LoginForm() {
               Create new account
             </button>
           </p>
-        </div>
-        
-        {/* Debug section - remove in production */}
-        <div className="mt-4 text-center">
-          <button
-            type="button"
-            onClick={testApiConnectivity}
-            className="text-sm text-gray-500 hover:text-gray-700 underline"
-          >
-            Test API Connectivity
-          </button>
         </div>
       </div>
     </div>

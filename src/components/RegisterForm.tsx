@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authAPI, RegisterRequest } from '@/lib/api';
+import CaptchaField from './CaptchaField';
 
 export default function RegisterForm() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -11,7 +12,8 @@ export default function RegisterForm() {
     lastname: '',
     email: '',
     password: '',
-    phoneNumber: ''
+    phoneNumber: '',
+    captcha: ''
   });
   const [registrationId, setRegistrationId] = useState('');
   const [verificationSid, setVerificationSid] = useState('');
@@ -38,7 +40,8 @@ export default function RegisterForm() {
         firstname: formData.firstname,
         lastname: formData.lastname,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        captcha: formData.captcha
       };
 
       const response = await authAPI.registerUser(registerData);
@@ -51,7 +54,18 @@ export default function RegisterForm() {
       }
     } catch (err) {
       console.error('Registration error:', err);
-      setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
+      
+      if (err instanceof Error) {
+        if (err.message.includes('CAPTCHA verification required')) {
+          setError('CAPTCHA verification is required. Please enter the verification code.');
+        } else if (err.message.includes('CAPTCHA')) {
+          setError('Invalid CAPTCHA code. Please check and try again.');
+        } else {
+          setError(err.message);
+        }
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -218,6 +232,11 @@ export default function RegisterForm() {
           placeholder="Enter your password"
         />
       </div>
+
+      <CaptchaField
+        value={formData.captcha}
+        onChange={(value: string) => setFormData({...formData, captcha: value})}
+      />
 
       <button
         type="submit"

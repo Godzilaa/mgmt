@@ -40,6 +40,7 @@ export interface RegisterRequest {
   lastname: string;
   email: string;
   password: string;
+  captcha?: string; // Optional CAPTCHA field
 }
 
 export interface RegisterResponse {
