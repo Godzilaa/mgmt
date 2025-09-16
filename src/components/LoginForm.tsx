@@ -7,7 +7,7 @@ import { authAPI, LoginRequest } from '@/lib/api';
 export default function LoginForm() {
   const [formData, setFormData] = useState({
     identifier: '',
-    role: 'U_ADM', // Default role
+    role: 'U_DEF', // Default role
     password: ''
   });
   const [loading, setLoading] = useState(false);
@@ -110,10 +110,17 @@ export default function LoginForm() {
                 onChange={handleInputChange}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               >
-                <option value="U_ADM">Admin</option>
                 <option value="U_DEF">Default User</option>
-                <option value="U_PRAC">Practitioner</option>
                 <option value="U_PAT">Patient</option>
+                <option value="U_PRAC">Practitioner</option>
+                <option value="U_NUR">Nurse</option>
+                <option value="U_HOS">Hospital</option>
+                <option value="U_INS">Insurance</option>
+                <option value="U_BIL">Billing</option>
+                <option value="U_REC">Receptionist</option>
+                <option value="U_ADM">Admin</option>
+                <option value="U_SUP">Super Admin</option>
+                <option value="U_DEV">Developer</option>
               </select>
             </div>
             
@@ -148,7 +155,7 @@ export default function LoginForm() {
         {/* Registration link */}
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <button
               type="button"
               onClick={() => router.push('/register')}

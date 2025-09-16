@@ -1,7 +1,7 @@
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: 'https://ausa-main-gagnfqbkhvgbhme2.centralindia-01.azurewebsites.net',
-  USE_PROXY: true, // Set to false to make direct API calls (requires CORS to be configured on the server)
+  BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://ausa-main-gagnfqbkhvgbhme2.centralindia-01.azurewebsites.net',
+  USE_PROXY: process.env.NEXT_PUBLIC_USE_PROXY === 'true',
   ENDPOINTS: {
     // Authentication endpoints
     LOGIN_INITIATE: '/authenticate/web/user/initiate?identifierType=email',
@@ -17,11 +17,8 @@ export const API_CONFIG = {
   
   // Development settings
   DEV: {
-    ENABLE_LOGGING: true,
+    ENABLE_LOGGING: process.env.NEXT_PUBLIC_ENABLE_LOGGING === 'true',
     PROXY_ENDPOINT: '/api/proxy',
-    // Use a dummy CAPTCHA value for development testing
-    BYPASS_CAPTCHA: true,
-    DUMMY_CAPTCHA: 'dev-bypass-2025',
   }
 };
 

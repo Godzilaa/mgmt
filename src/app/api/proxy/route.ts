@@ -50,6 +50,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   return NextResponse.json({ message: 'API Proxy is running. Use POST method.' });
 }

@@ -143,7 +143,7 @@ export default function VerifyPage() {
                 onClick={handleResendCode}
                 className="text-sm text-indigo-600 hover:text-indigo-500"
               >
-                Didn't receive a code? Resend
+                Didn&apos;t receive a code? Resend
               </button>
             </div>
 

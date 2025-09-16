@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authAPI, RegisterRequest } from '@/lib/api';
-import CaptchaField from './CaptchaField';
 
 export default function RegisterForm() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -12,8 +11,7 @@ export default function RegisterForm() {
     lastname: '',
     email: '',
     password: '',
-    phoneNumber: '',
-    captcha: ''
+    phoneNumber: ''
   });
   const [registrationId, setRegistrationId] = useState('');
   const [verificationSid, setVerificationSid] = useState('');
@@ -40,8 +38,7 @@ export default function RegisterForm() {
         firstname: formData.firstname,
         lastname: formData.lastname,
         email: formData.email,
-        password: formData.password,
-        captcha: formData.captcha
+        password: formData.password
       };
 
       const response = await authAPI.registerUser(registerData);
@@ -56,13 +53,7 @@ export default function RegisterForm() {
       console.error('Registration error:', err);
       
       if (err instanceof Error) {
-        if (err.message.includes('CAPTCHA verification required')) {
-          setError('CAPTCHA verification is required. Please enter the verification code.');
-        } else if (err.message.includes('CAPTCHA')) {
-          setError('Invalid CAPTCHA code. Please check and try again.');
-        } else {
-          setError(err.message);
-        }
+        setError(err.message);
       } else {
         setError('Registration failed. Please try again.');
       }
@@ -233,11 +224,6 @@ export default function RegisterForm() {
         />
       </div>
 
-      <CaptchaField
-        value={formData.captcha}
-        onChange={(value: string) => setFormData({...formData, captcha: value})}
-      />
-
       <button
         type="submit"
         disabled={loading}
@@ -252,7 +238,7 @@ export default function RegisterForm() {
     <form onSubmit={handleEmailVerification} className="space-y-6">
       <div className="text-center">
         <p className="text-sm text-gray-600 mb-4">
-          We've sent a verification code to <strong>{formData.email}</strong>
+          We&apos;ve sent a verification code to <strong>{formData.email}</strong>
         </p>
       </div>
       
@@ -321,7 +307,7 @@ export default function RegisterForm() {
     <form onSubmit={handlePhoneVerification} className="space-y-6">
       <div className="text-center">
         <p className="text-sm text-gray-600 mb-4">
-          We've sent a verification code to <strong>{formData.phoneNumber}</strong>
+          We&apos;ve sent a verification code to <strong>{formData.phoneNumber}</strong>
         </p>
       </div>
       

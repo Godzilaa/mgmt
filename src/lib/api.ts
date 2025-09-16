@@ -31,7 +31,17 @@ export interface VerifyResponse {
   success: boolean;
   message: string;
   code: number;
-  data?: any;
+  data?: {
+    user?: {
+      userId?: string;
+      email?: string;
+      role?: string;
+      firstname?: string;
+      lastname?: string;
+    };
+    sessionToken?: string;
+    [key: string]: unknown;
+  };
 }
 
 // Registration interfaces
@@ -40,7 +50,6 @@ export interface RegisterRequest {
   lastname: string;
   email: string;
   password: string;
-  captcha?: string; // Optional CAPTCHA field
 }
 
 export interface RegisterResponse {
@@ -64,7 +73,10 @@ export interface EmailVerifyResponse {
   success: boolean;
   message: string;
   code: number;
-  data?: any;
+  data?: {
+    verificationSid?: string;
+    [key: string]: unknown;
+  };
 }
 
 export interface PhoneSendRequest {
@@ -92,7 +104,11 @@ export interface PhoneVerifyResponse {
   success: boolean;
   message: string;
   code: number;
-  data?: any;
+  data?: {
+    userId?: string;
+    sessionToken?: string;
+    [key: string]: unknown;
+  };
 }
 
 // CORS-friendly fetch utility with proxy support
@@ -202,15 +218,15 @@ export const authAPI = {
   },
 
   // Logout endpoint
-  logout: async (): Promise<any> => {
+  logout: async (): Promise<{ success: boolean; message: string }> => {
     if (USE_PROXY && isClient) {
       // When using proxy, pass empty data
-      return apiCall<any>(ENDPOINTS.LOGOUT, {
+      return apiCall<{ success: boolean; message: string }>(ENDPOINTS.LOGOUT, {
         body: JSON.stringify({}),
       });
     } else {
       // Direct API call
-      return apiCall<any>(ENDPOINTS.LOGOUT, {
+      return apiCall<{ success: boolean; message: string }>(ENDPOINTS.LOGOUT, {
         method: 'POST',
       });
     }
