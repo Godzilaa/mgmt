@@ -20,7 +20,16 @@ export default function DashboardPage() {
     const userId = sessionStorage.getItem('userId');
     const userRole = sessionStorage.getItem('userRole');
     
+    console.log('Dashboard - Session data check:', {
+      userId,
+      userRole,
+      userIdentifier: sessionStorage.getItem('userIdentifier'),
+      sessionToken: sessionStorage.getItem('sessionToken'),
+      allSessionKeys: Object.keys(sessionStorage)
+    });
+    
     if (!userId || !userRole) {
+      console.log('Missing authentication data, redirecting to login');
       // If not authenticated, redirect to login
       router.push('/');
       return;
@@ -75,7 +84,7 @@ export default function DashboardPage() {
   }
 
   if (!userProfile) {
-    return null; // This shouldn't happen as we redirect above
+    return undefined; // This shouldn't happen as we redirect above
   }
 
   return (
@@ -88,12 +97,54 @@ export default function DashboardPage() {
               <h1 className="text-2xl font-bold text-gray-900">Management Portal</h1>
               <p className="text-sm text-gray-600">Welcome back!</p>
             </div>
-            <button
-              onClick={handleLogout}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-            >
-              Logout
-            </button>
+            <div className="flex items-center space-x-2">
+              {/* Navigation Links */}
+              {/* Debug: Show current role */}
+              <span className="text-xs text-gray-500">Role: {userProfile.role}</span>
+              
+              {/* Show user management link for admins only */}
+                <a
+                  href="/user-management"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-2"
+                >
+                  <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                  User Management
+                </a>
+              )
+
+              {/* Show care provider link for practitioners and admins */}
+              {(userProfile.role === 'U_PRAC' || userProfile.role === 'U_ADM') && (
+                <a
+                  href="/care-provider"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  Care Provider
+                </a>
+              )}
+              
+              {/* Temporary: Show care provider link for all users for testing */}
+              <a
+                href="/care-provider"
+                className="px-3 py-1 text-sm text-green-600 bg-white border border-green-300 rounded hover:bg-green-50"
+              >
+                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 715.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Care Provider (Test)
+              </a>
+              
+              <button
+                onClick={handleLogout}
+                className="px-3 py-1 text-sm text-white bg-red-600 border border-red-600 rounded hover:bg-red-700"
+              >
+                Logout
+              </button>
+            </div>
           </div>
         </div>
       </header>

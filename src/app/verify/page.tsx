@@ -48,10 +48,53 @@ export default function VerifyPage() {
       const response = await authAPI.verifyLogin(verifyData);
       
       if (response.success) {
-        // Store any additional user data if provided
+        // Store session token if provided
+        if (response.data?.sessionToken) {
+          sessionStorage.setItem('sessionToken', response.data.sessionToken);
+        }
+        
+        // Store user data if provided in verification response
+        if (response.data?.user) {
+          // Store complete user data
+          const userData = response.data.user;
+          if (userData.userId) {
+            sessionStorage.setItem('userId', userData.userId);
+          }
+          if (userData.role) {
+            console.log('Setting user role:', userData.role);
+            sessionStorage.setItem('userRole', userData.role);
+          } else {
+            // If role is not in user data, try to use the role from initial login
+            const initialRole = sessionStorage.getItem('userRole');
+            console.log('Using initial role:', initialRole);
+            if (initialRole) {
+              sessionStorage.setItem('userRole', initialRole);
+            }
+          }
+          if (userData.email) {
+            sessionStorage.setItem('userIdentifier', userData.email);
+          }
+        }
+        
+        // Log the complete session data for debugging
+        console.log('Complete verification response:', response.data);
+        console.log('Updated session data:', {
+          userId: sessionStorage.getItem('userId'),
+          userRole: sessionStorage.getItem('userRole'),
+          userIdentifier: sessionStorage.getItem('userIdentifier'),
+          sessionToken: sessionStorage.getItem('sessionToken')
+        });
+        
+        // Store the full response data for debugging
         if (response.data) {
           sessionStorage.setItem('userToken', JSON.stringify(response.data));
         }
+        
+        console.log('Stored session data:', {
+          userId: sessionStorage.getItem('userId'),
+          userRole: sessionStorage.getItem('userRole'),
+          userIdentifier: sessionStorage.getItem('userIdentifier')
+        });
         
         // Redirect to dashboard
         router.push('/dashboard');

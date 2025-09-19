@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authAPI, RegisterRequest } from '@/lib/api';
+import { config } from '@/lib/config';
+import CaptchaWidget from './CaptchaWidget';
 
 export default function RegisterForm() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -17,6 +19,7 @@ export default function RegisterForm() {
   const [verificationSid, setVerificationSid] = useState('');
   const [emailCode, setEmailCode] = useState('');
   const [phoneCode, setPhoneCode] = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -33,7 +36,32 @@ export default function RegisterForm() {
     setLoading(true);
     setError('');
 
+    // Check if CAPTCHA is completed
+    if (!captchaToken) {
+      setError('Please complete the CAPTCHA verification');
+      setLoading(false);
+      return;
+    }
+
     try {
+      // First verify CAPTCHA server-side
+      const captchaVerification = await fetch('/api/captcha/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token: captchaToken }),
+      });
+
+      const captchaResult = await captchaVerification.json();
+      
+      if (!captchaResult.success) {
+        setError('CAPTCHA verification failed. Please try again.');
+        setCaptchaToken(''); // Reset CAPTCHA
+        setLoading(false);
+        return;
+      }
+
       const registerData: RegisterRequest = {
         firstname: formData.firstname,
         lastname: formData.lastname,
@@ -224,9 +252,16 @@ export default function RegisterForm() {
         />
       </div>
 
+      <CaptchaWidget
+        provider={config.captcha.provider === 'none' ? 'recaptcha' : config.captcha.provider}
+        onVerify={(token) => setCaptchaToken(token)}
+        onError={(error) => setError(`CAPTCHA error: ${error}`)}
+        onExpired={() => setCaptchaToken('')}
+      />
+
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || !captchaToken}
         className="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? 'Creating Account...' : 'Create Account'}

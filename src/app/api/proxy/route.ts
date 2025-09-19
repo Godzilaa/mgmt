@@ -16,14 +16,28 @@ export async function POST(request: NextRequest) {
     console.log('Proxying request to:', `${BASE_URL}${endpoint}`);
     console.log('Request body:', body);
 
+    // Determine HTTP method from body or default to POST
+    const method = body.method || 'POST';
+    const requestBody = method === 'GET' ? undefined : JSON.stringify(body);
+
+    const headers: Record<string, string> = {
+      'Accept': 'application/json',
+      'User-Agent': 'NextJS-Proxy/1.0',
+    };
+
+    if (method !== 'GET') {
+      headers['Content-Type'] = 'application/json';
+    }
+
+    // Add authentication header if session token is provided
+    if (body.sessionToken) {
+      headers['Authorization'] = `Bearer ${body.sessionToken}`;
+    }
+
     const response = await fetch(`${BASE_URL}${endpoint}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'NextJS-Proxy/1.0',
-      },
-      body: JSON.stringify(body),
+      method: method,
+      headers: headers,
+      body: requestBody,
     });
 
     console.log('API Response status:', response.status);
