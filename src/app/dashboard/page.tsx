@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authAPI } from '@/lib/api';
+import { appointmentApi, Appointment } from '@/lib/appointmentApi';
 
 interface UserProfile {
   userId: string;
@@ -13,7 +14,29 @@ interface UserProfile {
 export default function DashboardPage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [appointmentsLoading, setAppointmentsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  const loadAppointments = async () => {
+    try {
+      setAppointmentsLoading(true);
+      const role = sessionStorage.getItem('userRole');
+      
+      const response = role === 'U_PAT' 
+        ? await appointmentApi.getPersonalAppointments(1, 5) // Get personal appointments for patients
+        : await appointmentApi.getAppointments(1, 5); // Get all appointments for practitioners/admins
+      
+      if (response.success && response.appointments) {
+        setAppointments(response.appointments);
+      }
+    } catch (err) {
+      console.error('Error loading appointments:', err);
+    } finally {
+      setAppointmentsLoading(false);
+    }
+  };
 
   useEffect(() => {
     // Check if user is authenticated
@@ -43,6 +66,9 @@ export default function DashboardPage() {
     });
     
     setLoading(false);
+    
+    // Load appointments
+    loadAppointments();
   }, [router]);
 
   const handleLogout = async () => {
@@ -153,6 +179,83 @@ export default function DashboardPage() {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Appointments Card */}
+            <div className="bg-white overflow-hidden shadow-lg rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-900">Recent Appointments</h3>
+                  <a
+                    href={userProfile?.role === 'U_PAT' ? '/appointments/personal' : '/appointments'}
+                    className="text-sm text-indigo-600 hover:text-indigo-500"
+                  >
+                    View all
+                  </a>
+                </div>
+                
+                {appointmentsLoading ? (
+                  <div className="flex justify-center py-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                  </div>
+                ) : appointments.length === 0 ? (
+                  <p className="text-gray-500 text-center py-4">No appointments found</p>
+                ) : (
+                  <div className="space-y-4">
+                    {appointments.slice(0, 3).map((appointment) => (
+                      <div key={appointment._id} className="border rounded-lg p-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="text-base font-medium text-gray-900">{appointment.title}</h4>
+                            <p className="text-sm text-gray-500 mt-1">{appointment.description}</p>
+                          </div>
+                          {userProfile?.role === 'U_PAT' && (
+                            <div>
+                              {!appointment.participants.find(p => 
+                                p.userId === userProfile.userId && p.accepted
+                              ) ? (
+                                <button
+                                  onClick={() => appointment._id && appointmentApi.acceptAppointment(appointment._id)}
+                                  className="text-sm text-green-600 bg-green-100 hover:bg-green-200 px-3 py-1 rounded-md"
+                                >
+                                  Accept
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => appointment._id && appointmentApi.joinAppointment(appointment._id)}
+                                  className="text-sm text-indigo-600 bg-indigo-100 hover:bg-indigo-200 px-3 py-1 rounded-md"
+                                >
+                                  Join
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        <div className="mt-2 flex items-center text-sm text-gray-500">
+                          <svg className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                          </svg>
+                          {new Date(appointment.timestamps.scheduledStartTime).toLocaleString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+             
+                  <div className="mt-4">
+                    <a
+                      href="/appointments"
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 w-full justify-center"
+                    >
+                      <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                      Schedule New Appointment
+                    </a>
+                  </div>
+                
+              </div>
+            </div>
+
             {/* Profile Card */}
             <div className="bg-white overflow-hidden shadow-lg rounded-lg">
               <div className="px-4 py-5 sm:p-6">
